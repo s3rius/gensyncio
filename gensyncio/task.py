@@ -38,7 +38,7 @@ class Task[_G, _R]:
             return True
         return self.status == "finished"
 
-    def cacnel(self) -> None:
+    def cancel(self) -> None:
         self.status = "cancelled"
         self.gen.throw(GenCancelledError())
 

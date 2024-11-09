@@ -58,10 +58,10 @@ class Loop:
         while True:
             self.tick()
 
-    def cacel_all(self):
+    def cancel_all(self):
         for task in self.running:
             try:
-                task.cacnel()
+                task.cancel()
             except GenCancelledError:
                 continue
         # We do one more tick to advance all generators to the end.
@@ -74,6 +74,6 @@ class Loop:
         task = self.create_task(task)
         while True:
             if task.done():
-                self.cacel_all()
+                self.cancel_all()
                 return task.result
             self.tick()
