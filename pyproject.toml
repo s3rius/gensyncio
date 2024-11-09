@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "gensyncio"
+version = "0.1.0"
+description = ""
+authors = ["Pavel Kirilin <win10@list.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.7.2"
+black = "^24.10.0"
+mypy = "^1.13.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
