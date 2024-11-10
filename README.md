@@ -45,6 +45,74 @@ def main() -> Generator[None, None, None]:
 gensyncio.run(main())
 ```
 
+# Sync primitives
+
+This lib implements syncronization primitives for async programming. Such as:
+
+* Event
+* Lock
+
+Here are examples of how they should be used:
+
+An event:
+```python
+import gensyncio
+
+
+def waiter(event: gensyncio.Event):
+    print("waiting for it ...")
+    yield from event.wait()
+    print("... got it!")
+
+
+def main():
+    # Create an Event object.
+    event = gensyncio.Event()
+
+    # Spawn a Task to wait until 'event' is set.
+    waiter_task = gensyncio.create_task(waiter(event))
+
+    # Sleep for 1 second and set the event.
+    yield from gensyncio.sleep(1)
+    event.set()
+
+    # Wait until the waiter task is finished.
+    yield from waiter_task
+
+
+gensyncio.run(main())
+```
+
+A lock:
+
+```python
+from typing import Generator
+import gensyncio
+
+
+def print_after(lock: gensyncio.Lock, delay: float, val: str) -> Generator[None, None, None]:
+    """Print after delay, but wit aquiring a lock."""
+    # Here we are using the lock as a context manager
+    with lock as _lock:
+        # This will yield from the lock, and wait until the lock is released
+        yield from _lock
+        # This will yield from the sleep, and wait until the sleep is done
+        yield from gensyncio.sleep(delay)
+    print(val)
+
+
+def main() -> Generator[None, None, None]:
+    loop = gensyncio.get_running_loop()
+    lock = gensyncio.Lock()
+    loop.create_task(print_after(lock, 2, "one"))
+    t = loop.create_task(print_after(lock, 1, "two"))
+    # Here we wait for the task to finish
+    yield from t
+
+
+gensyncio.run(main())
+```
+
 # Sockets
 
 Also this lib contains a simple socket implementation which is compatible with generators approach.

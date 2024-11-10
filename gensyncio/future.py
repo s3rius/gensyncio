@@ -11,7 +11,7 @@ class Future:
 
     def done(self) -> bool:
         """Check if the future is done."""
-        return self.result != Undefined
+        return bool(self.result != Undefined)
 
     def set_result(self, result: Any) -> None:
         """Set the result of the future."""

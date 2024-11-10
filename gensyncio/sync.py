@@ -33,7 +33,7 @@ class Lock:
         self._locked = True
         return True
 
-    def release(self):
+    def release(self) -> None:
         if not self._locked:
             raise RuntimeError("Lock is not acquired.")
         self._locked = False
@@ -42,7 +42,7 @@ class Lock:
     def locked(self) -> bool:
         return self._locked
 
-    def _wake_up_next(self):
+    def _wake_up_next(self) -> None:
         if not self._waiters:
             return
         try:
@@ -69,14 +69,14 @@ class Lock:
 
 
 class Event:
-    def __init__(self):
+    def __init__(self) -> None:
         self._waiters: deque[Future] = deque()
         self._value = False
 
-    def is_set(self):
+    def is_set(self) -> bool:
         return self._value
 
-    def set(self):
+    def set(self) -> None:
         if self._value:
             return
         self._value = True
@@ -84,7 +84,7 @@ class Event:
             if not fut.done():
                 fut.set_result(True)
 
-    def clear(self):
+    def clear(self) -> None:
         self._value = False
 
     def wait(self) -> Generator[None, None, bool]:
@@ -99,7 +99,7 @@ class Event:
         finally:
             self._waiters.remove(fut)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = super().__repr__()
         extra = "set" if self._value else "unset"
         if self._waiters:

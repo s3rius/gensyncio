@@ -32,7 +32,7 @@ class Request:
         self.method = method
         self.headers = headers
         self._read_body = read_body
-        self._full_body = None
+        self._full_body: bytes | None = None
         self._body_reader = body_reader
         self.peer_addr = peer_addr
         self.content_length = int(headers.get("content-length", b"0"))
@@ -138,10 +138,8 @@ class Router:
         method: str,
         path: str,
     ) -> Callable[[HandlerType], HandlerType]:
-        def inner(
-            handler: HandlerType,
-        ) -> HandlerType:
-            self.add_route(Route(method, path, handler))  # type: ignore
+        def inner(handler: HandlerType) -> HandlerType:
+            self.add_route(Route(method, path, handler))
             return handler
 
         return inner
@@ -212,7 +210,11 @@ class Server:
                 break
         self.socket.close()
 
-    def process_request(self, socket: GenSocket, addr: Tuple[str, int]):
+    def process_request(
+        self,
+        socket: GenSocket,
+        addr: Tuple[str, int],
+    ) -> Generator[None, None, None]:
         http_message = yield from parse_http_message(socket, chunk_size=1024)
         method, path, http_ver = http_message.status_line.split(" ", 2)
 

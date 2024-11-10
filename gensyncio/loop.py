@@ -1,4 +1,4 @@
-from typing import Any, Generator, TypeVar
+from typing import Any, Generator, NoReturn, TypeVar
 from gensyncio.exceptions import GenCancelledError
 from gensyncio.future import Future
 from gensyncio.globs import set_running_loop
@@ -16,7 +16,7 @@ class Loop:
         self.to_delete: list[Task[Any, Any]] = []
         self.to_add: list[Task[Any, Any]] = []
 
-    def tick(self):
+    def tick(self) -> list[Task[Any, Any]]:
         for task in self.to_add:
             task.set_loop(self)
             self.running.append(task)
@@ -53,15 +53,15 @@ class Loop:
         self.add_task(task_gen)
         return task_gen
 
-    def add_task(self, task: Task):
+    def add_task(self, task: Task[Any, Any]) -> None:
         self.to_add.append(task)
 
-    def run_forever(self):
+    def run_forever(self) -> NoReturn:
         set_running_loop(self)
         while True:
             self.tick()
 
-    def cancel_all(self):
+    def cancel_all(self) -> None:
         for task in self.running:
             try:
                 task.cancel()

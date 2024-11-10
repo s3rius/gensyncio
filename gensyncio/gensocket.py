@@ -30,10 +30,10 @@ class GenSocket:
                 raise
         yield from self.wait_writable()
 
-    def send(self, data: bytes, flags: int = 0, /):
+    def send(self, data: bytes, flags: int = 0, /) -> None:
         self._inner.send(data, flags)
 
-    def wait_writable(self):
+    def wait_writable(self) -> Generator[None, None, None]:
         while True:
             _, writable, _ = select.select([], [self], [], 0.01)
             if not writable:
@@ -41,7 +41,7 @@ class GenSocket:
                 continue
             break
 
-    def wait_readable(self):
+    def wait_readable(self) -> Generator[None, None, None]:
         while True:
             readable, _, _ = select.select([self], [], [], 0.01)
             if not readable:
@@ -49,7 +49,7 @@ class GenSocket:
                 continue
             break
 
-    def recv(self, bufsize: int, flags: int = 0, /) -> Generator[None, None, bytes]:  # type: ignore
+    def recv(self, bufsize: int, flags: int = 0, /) -> Generator[None, None, bytes]:
         yield from self.wait_readable()
         while True:
             yield
