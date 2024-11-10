@@ -7,3 +7,5 @@ from . import http
 from .gensocket import GenSocket
 from .future import Future
 from .sync import Event, Lock
+from .queue import Queue
+from .exceptions import GenCancelledError

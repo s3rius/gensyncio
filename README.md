@@ -113,6 +113,70 @@ def main() -> Generator[None, None, None]:
 gensyncio.run(main())
 ```
 
+# Queue
+
+The queue is the same as asyncio Queue. This example is rewritten asyncio.Queue example from python docs.
+
+```python
+import random
+import time
+
+import gensyncio
+
+
+def worker(name: str, queue: gensyncio.Queue[float]):
+    while True:
+        # Get a "work item" out of the queue.
+        sleep_for = yield from queue.get()
+
+        # Sleep for the "sleep_for" seconds.
+        yield from gensyncio.sleep(sleep_for)
+
+        # Notify the queue that the "work item" has been processed.
+        queue.task_done()
+
+        print(f"{name} has slept for {sleep_for:.2f} seconds")
+
+
+def main():
+    # Create a queue that we will use to store our "workload".
+    queue = gensyncio.Queue()
+
+    # Generate random timings and put them into the queue.
+    total_sleep_time = 0
+    for _ in range(20):
+        sleep_for = random.uniform(0.05, 1.0)
+        total_sleep_time += sleep_for
+        queue.put_nowait(sleep_for)
+
+    # Create three worker tasks to process the queue concurrently.
+    tasks = []
+    for i in range(3):
+        task = gensyncio.create_task(worker(f"worker-{i}", queue))
+        tasks.append(task)
+
+    # Wait until the queue is fully processed.
+    started_at = time.monotonic()
+    yield from queue.join()
+    total_slept_for = time.monotonic() - started_at
+
+    # Cancel our worker tasks.
+    for task in tasks:
+        try:
+            task.cancel()
+        except gensyncio.GenCancelledError:
+            pass
+    # Wait until all worker tasks are cancelled.
+    yield from gensyncio.gather(*tasks)
+
+    print("====")
+    print(f"3 workers slept in parallel for {total_slept_for:.2f} seconds")
+    print(f"total expected sleep time: {total_sleep_time:.2f} seconds")
+
+
+gensyncio.run(main())
+```
+
 # Sockets
 
 Also this lib contains a simple socket implementation which is compatible with generators approach.
