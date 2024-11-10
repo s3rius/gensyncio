@@ -1,10 +1,13 @@
 import time
-from typing import Any, Generator, Tuple
+from typing import Any, Generator, Tuple, TypeVar
 from uuid import UUID
 
 from gensyncio.loop import Loop
 from gensyncio.task import Task
 from .globs import get_running_loop
+
+_G = TypeVar("_G")
+_R = TypeVar("_R")
 
 
 def sleep(delay: float) -> Generator[None, None, None]:
@@ -39,3 +42,11 @@ def run(coro: Generator[Any, Any, Any] | Task[Any, Any]) -> Any:
     except RuntimeError:
         loop = Loop()
     return loop.run_until_complete(coro)
+
+
+def create_task(coro: Generator[_G, Any, _R] | Task[_G, _R]) -> Task[_G, _R]:
+    try:
+        loop = get_running_loop()
+    except RuntimeError:
+        loop = Loop()
+    return loop.create_task(coro)

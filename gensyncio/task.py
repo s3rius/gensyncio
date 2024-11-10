@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 
 class Task[_G, _R]:
-    def __init__(self, gen: Generator[Any, _G, _R]) -> None:
+    def __init__(self, gen: Generator[_G, Any, _R]) -> None:
         self.gen = gen
         self.id = uuid.uuid4()
         self.status = "pending"

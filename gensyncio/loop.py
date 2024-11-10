@@ -1,10 +1,12 @@
 from typing import Any, Generator, TypeVar
 from gensyncio.exceptions import GenCancelledError
+from gensyncio.future import Future
 from gensyncio.globs import set_running_loop
 from gensyncio.task import Task
 import copy
 
 
+_G = TypeVar("_G")
 _R = TypeVar("_R")
 
 
@@ -39,9 +41,10 @@ class Loop:
         self.to_delete.clear()
         return done
 
-    def create_task(
-        self, task: Generator[Any, Any, _R] | Task[Any, _R]
-    ) -> Task[Any, _R]:
+    def create_future(self) -> Future:
+        return Future()
+
+    def create_task(self, task: Generator[_G, Any, _R] | Task[_G, _R]) -> Task[_G, _R]:
         if isinstance(task, Generator):
             task_gen = Task(task)
         else:
@@ -68,7 +71,7 @@ class Loop:
         self.tick()
 
     def run_until_complete(
-        self, task: Generator[Any, Any, _R] | Task[Any, _R]
+        self, task: Generator[_G, Any, _R] | Task[_G, _R]
     ) -> _R | None:
         set_running_loop(self)
         task = self.create_task(task)
